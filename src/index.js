@@ -1,4 +1,3 @@
-import fetch from 'node-fetch';
 import packageJson from '../package.json';
 
 const { npm_package_name, npm_package_version } = process.env;
