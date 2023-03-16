@@ -1,7 +1,15 @@
 import assert from 'assert';
-import { describe, it, beforeEach, afterEach } from 'mocha';
+import { describe, it, beforeEach, afterEach, before, after } from 'mocha';
 
 describe('http lib', function () {
+  let _fetch;
+  before(() => {
+    _fetch = globalThis.fetch;
+  });
+  after(() => {
+    globalThis.fetch = _fetch;
+  });
+
   describe('http_get', function () {
     //
     it('Should call http_get an get res.text() from execute', async function () {
@@ -19,9 +27,7 @@ describe('http lib', function () {
         };
       };
       delete require.cache[require.resolve('../src/')];
-      require.cache[require.resolve('node-fetch')] = {
-        exports: fetch
-      };
+      globalThis.fetch = fetch;
 
       const { http_get } = require('../src/');
       const result = await http_get('test');
@@ -46,9 +52,7 @@ describe('http lib', function () {
         };
       };
       delete require.cache[require.resolve('../src/')];
-      require.cache[require.resolve('node-fetch')] = {
-        exports: fetch
-      };
+      globalThis.fetch = fetch;
 
       const { http_get } = require('../src/');
       const result = await http_get('test');
@@ -78,9 +82,8 @@ describe('http lib', function () {
         };
       };
       delete require.cache[require.resolve('../src/')];
-      require.cache[require.resolve('node-fetch')] = {
-        exports: fetch
-      };
+      globalThis.fetch = fetch;
+
       const { http_get } = require('../src/');
       const result = await http_get('test');
       assert.strictEqual(result, false, 'Result must be false');
@@ -107,9 +110,7 @@ describe('http lib', function () {
         };
       };
       delete require.cache[require.resolve('../src/')];
-      require.cache[require.resolve('node-fetch')] = {
-        exports: fetch
-      };
+      globalThis.fetch = fetch;
 
       const { http_get } = require('../src/');
       let errored = false;
@@ -143,9 +144,7 @@ describe('http lib', function () {
         };
       };
       delete require.cache[require.resolve('../src/')];
-      require.cache[require.resolve('node-fetch')] = {
-        exports: fetch
-      };
+      globalThis.fetch = fetch;
 
       const { http_get } = require('../src/');
       const result = await http_get(
@@ -180,9 +179,7 @@ describe('http lib', function () {
         };
       };
       delete require.cache[require.resolve('../src/')];
-      require.cache[require.resolve('node-fetch')] = {
-        exports: fetch
-      };
+      globalThis.fetch = fetch;
 
       const { http_get } = require('../src/');
       const result = await http_get(
@@ -225,9 +222,8 @@ describe('http lib', function () {
         };
       };
       delete require.cache[require.resolve('../src/')];
-      require.cache[require.resolve('node-fetch')] = {
-        exports: fetch
-      };
+      globalThis.fetch = fetch;
+
       delete process.env.npm_package_name;
       delete process.env.npm_package_version;
       const { http_get } = require('../src/');
@@ -251,9 +247,8 @@ describe('http lib', function () {
         };
       };
       delete require.cache[require.resolve('../src/')];
-      require.cache[require.resolve('node-fetch')] = {
-        exports: fetch
-      };
+      globalThis.fetch = fetch;
+
       const { http_del } = require('../src/');
       const result = await http_del('test');
       assert.strictEqual(result, 'delete', 'Result must be delete');
@@ -275,9 +270,8 @@ describe('http lib', function () {
         };
       };
       delete require.cache[require.resolve('../src/')];
-      require.cache[require.resolve('node-fetch')] = {
-        exports: fetch
-      };
+      globalThis.fetch = fetch;
+
       const { http_del } = require('../src/');
       const result = await http_del('test');
       assert.strictEqual(result, false, 'Result must be false');
@@ -302,9 +296,8 @@ describe('http lib', function () {
         };
       };
       delete require.cache[require.resolve('../src/')];
-      require.cache[require.resolve('node-fetch')] = {
-        exports: fetch
-      };
+      globalThis.fetch = fetch;
+
       const { http_put } = require('../src/');
       const result = await http_put('test');
       assert.strictEqual(result, 'put', 'Result must be put');
@@ -328,9 +321,8 @@ describe('http lib', function () {
         };
       };
       delete require.cache[require.resolve('../src/')];
-      require.cache[require.resolve('node-fetch')] = {
-        exports: fetch
-      };
+      globalThis.fetch = fetch;
+
       const { http_patch } = require('../src/');
       const result = await http_patch('test');
       assert.strictEqual(result, 'patch', 'Result must be put');
@@ -353,9 +345,8 @@ describe('http lib', function () {
         };
       };
       delete require.cache[require.resolve('../src/')];
-      require.cache[require.resolve('node-fetch')] = {
-        exports: fetch
-      };
+      globalThis.fetch = fetch;
+
       const { http_post } = require('../src/');
       const result = await http_post('test');
       assert.strictEqual(result, 'post', 'Result must be post');
@@ -376,9 +367,8 @@ describe('http lib', function () {
         };
       };
       delete require.cache[require.resolve('../src/')];
-      require.cache[require.resolve('node-fetch')] = {
-        exports: fetch
-      };
+      globalThis.fetch = fetch;
+
       const { http_post } = require('../src/');
       const result = await http_post('/whatever', { test: 'me' }, { 'Content-Type': 'application/json' });
       assert.strictEqual(result.test, 'me', 'Result must be me');
@@ -399,9 +389,8 @@ describe('http lib', function () {
         };
       };
       delete require.cache[require.resolve('../src/')];
-      require.cache[require.resolve('node-fetch')] = {
-        exports: fetch
-      };
+      globalThis.fetch = fetch;
+
       const { http_post } = require('../src/');
       const result = await http_post('/whatever', 'me');
       assert.strictEqual(result, 'me', 'Result must be me');
@@ -422,9 +411,8 @@ describe('http lib', function () {
         };
       };
       delete require.cache[require.resolve('../src/')];
-      require.cache[require.resolve('node-fetch')] = {
-        exports: fetch
-      };
+      globalThis.fetch = fetch;
+
       const { http_post } = require('../src/');
       const result = await http_post('/whatever', 'me', { 'user-agent': 'test-httplib' });
       assert.strictEqual(result, 'me', 'Result must be me');
