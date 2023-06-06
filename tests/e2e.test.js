@@ -2,6 +2,7 @@ import { http_get, http_head, http_options, http_post, http_put, http_patch, htt
 import express from 'express';
 import assert from 'assert';
 import { describe, it, before, after } from 'mocha';
+import * as path from 'path';
 
 const app = express();
 
@@ -38,6 +39,10 @@ app.get('/headers', (req, res) => {
 
 app.get('/redirect', (req, res) => {
   res.redirect('/');
+});
+
+app.get('/jpg', (req, res) => {
+  res.sendFile(path.join(__dirname, 'unnamed.jpg'));
 });
 
 app.options('/', (req, res) => {
@@ -176,6 +181,10 @@ describe('e2e', function () {
       const { body, headers } = await http_get(`${url}/`, undefined, true);
       assert.deepStrictEqual(body, get_test);
       assert.strictEqual(headers.get(headerKey), headerValue);
+    });
+    it('must return an arraybuffer', async () => {
+      const ret = await http_get(`${url}/jpg`);
+      assert.deepStrictEqual(typeof ret, 'object');
     });
   });
   describe('http_head', function () {

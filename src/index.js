@@ -12,15 +12,25 @@ function hasHeader(headers, name) {
 }
 
 function handleResponse(res) {
-  const contentLength = res.headers.get('content-length');
-  if (contentLength !== null && Number(contentLength) === 0) {
+  function checkContentLength() {
+    const contentLength = res.headers.get('content-length');
+    return !(contentLength !== null && Number(contentLength) === 0);
+  }
+  if (!checkContentLength()) {
     return false;
   }
-  const contentType = res.headers.get('content-type');
-  if (contentType && contentType.toLowerCase().indexOf('application/json') >= 0) {
-    return res.json();
+  function checkContentType() {
+    const contentType = res.headers.get('content-type');
+    if (/application\/json/.test(contentType)) {
+      return res.json();
+    }
+    if (!contentType || /application\/xml/.test(contentType) || /^text\/|charset=utf-8$/.test(contentType)) {
+      return res.text();
+    }
+    return res.arrayBuffer();
   }
-  return res.text();
+
+  return checkContentType();
 }
 
 function handleHeaders(fetchOpts, headers) {
