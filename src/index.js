@@ -60,6 +60,7 @@ async function execute(method, path, data, reqHeaders = {}, fetchOpts = {}, retu
 
   if (res.status >= 400) {
     const error = new Error(res.statusText);
+    error.http_status = res.status;
     error.http_code = res.status;
     error.http_response = res;
     throw error;
@@ -79,7 +80,7 @@ async function execute(method, path, data, reqHeaders = {}, fetchOpts = {}, retu
 
   function handleReturn() {
     if (returnAlsoHeaders) {
-      return { headers, body };
+      return { status: res.status, headers, body };
     }
     return body;
   }
