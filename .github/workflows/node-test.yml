@@ -1,18 +1,7 @@
-name: lint test
+name: lint test compile
 
 on: push
 
 jobs:
-
-  test:
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v2
-      - name: Use Node.js 18.x
-        uses: actions/setup-node@v2
-        with:
-          node-version: '18'
-      - run: npm ci
-      - run: npm run lint
-      - run: npm test
-      - run: npm run build
+  node-lint-test-compile:
+    uses: fluidware-team/.github/.github/workflows/node-test.yml@v1
