@@ -104,11 +104,11 @@ async function execute<T>(
     return { headers };
   }
 
-  async function getBody<T>(): Promise<BodyResponse<T>> {
+  async function getBody<BodyT>(): Promise<BodyResponse<BodyT>> {
     if (res.status === 204) {
       return false;
     }
-    return handleResponse<T>(res);
+    return handleResponse<BodyT>(res);
   }
 
   const body = await getBody<T>();
