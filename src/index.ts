@@ -25,10 +25,21 @@ export type HeadersResponse = {
 
 export type BodyResponse<T> = boolean | string | ArrayBuffer | T;
 
-export type FullResponse<T> = {
-  headers: Headers;
-  body: BodyResponse<T>;
-};
+export type FullResponse<T> =
+  | HeadersResponse
+  | {
+      body: BodyResponse<T>;
+    };
+
+export type JSONValue =
+  | string
+  | number
+  | boolean
+  | null
+  | {
+      [x: string]: JSONValue;
+    }
+  | Array<JSONValue>;
 
 function hasHeader(headers: HeadersInit, name: string) {
   return Object.keys(headers).some(header => header.toLowerCase() === name);
@@ -60,13 +71,12 @@ function handleHeaders(fetchOpts: RequestInit, headers: Headers) {
   }
 }
 
-function handlePayload(fetchOpts: RequestInit, data: BodyInit) {
+function handlePayload(fetchOpts: RequestInit, data: BodyInit | JSONValue) {
   if (data instanceof Buffer) {
     fetchOpts.body = data;
     return;
   }
-  const dataType = typeof data;
-  if (dataType !== 'string') {
+  if (typeof data !== 'string') {
     data = JSON.stringify(data);
   }
   if (!fetchOpts.headers) {
@@ -83,7 +93,7 @@ function handlePayload(fetchOpts: RequestInit, data: BodyInit) {
 async function execute<T>(
   method: string,
   path: RequestInfo,
-  data: BodyInit | undefined,
+  data: BodyInit | JSONValue | undefined,
   reqHeaders = {} as Headers,
   fetchOpts = {} as RequestInit,
   returnAlsoHeaders = false
@@ -245,24 +255,24 @@ export async function http_put(
 
 export async function http_post(path: RequestInfo): Promise<unknown>;
 
-export async function http_post(path: RequestInfo, data?: BodyInit | object): Promise<unknown>;
+export async function http_post(path: RequestInfo, data?: BodyInit | JSONValue): Promise<unknown>;
 
 export async function http_post(
   path: RequestInfo,
-  data?: BodyInit | object,
+  data?: BodyInit | JSONValue,
   returnAlsoHeaders?: boolean
 ): Promise<unknown>;
 
 export async function http_post(
   path: RequestInfo,
-  data?: BodyInit | object,
+  data?: BodyInit | JSONValue,
   headers?: Headers,
   returnAlsoHeaders?: boolean
 ): Promise<unknown>;
 
 export async function http_post(
   path: RequestInfo,
-  data?: BodyInit | { [k: string]: any },
+  data?: BodyInit | JSONValue,
   headers?: Headers | boolean,
   fetchOpts?: RequestInit | boolean,
   returnAlsoHeaders?: boolean
