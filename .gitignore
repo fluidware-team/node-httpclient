@@ -104,3 +104,6 @@ es/
 # TernJS port file
 .tern-port
 xunit.xml
+
+build/
+src/version.ts

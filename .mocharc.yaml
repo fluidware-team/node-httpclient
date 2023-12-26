@@ -1,4 +1,3 @@
-require: '@babel/register'
 
 reporterEnabled: mocha-junit-reporter, mocha-sonarqube-reporter
 mochaJunitReporterReporterOptions:
@@ -6,4 +5,3 @@ mochaJunitReporterReporterOptions:
 
 mochaSonarqubeReporterReporterOptions:
   output: reports/xunit.xml
-    
