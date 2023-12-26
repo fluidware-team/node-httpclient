@@ -1,8 +1,8 @@
-import { http_get, http_head, http_options, http_post, http_put, http_patch, http_del } from '../src';
-import express from 'express';
-import assert from 'assert';
-import { describe, it, before, after } from 'mocha';
-import * as path from 'path';
+const { http_get, http_head, http_options, http_post, http_put, http_patch, http_del } = require('../build/src');
+const express = require( 'express');
+const assert = require( 'assert');
+const { describe, it, before, after } = require('mocha');
+const path = require( 'path');
 
 const app = express();
 
