@@ -1,6 +1,6 @@
 {
   "name": "@fluidware-it/httpclient",
-  "version": "0.2.1",
+  "version": "0.3.0-rc.0",
   "description": "http client package based on node fetch",
   "main": "build/src/index.js",
   "module": "build/esm/index.js",
