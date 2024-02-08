@@ -21,10 +21,14 @@ function handleResponse(res) {
   }
   function checkContentType() {
     const contentType = res.headers.get('content-type');
-    if (/^application\/([\w\.]+\+)?json(;.*)?/.test(contentType)) {
+    if (/^application\/([\w.]+\+)?json(;.*)?/.test(contentType)) {
       return res.json();
     }
-    if (!contentType || /^application\/([\w\.]+\+)?xml(;.*)?/.test(contentType) || /^text\/|charset=utf-8$/.test(contentType)) {
+    if (
+      !contentType ||
+      /^application\/([\w.]+\+)?xml(;.*)?/.test(contentType) ||
+      /^text\/|charset=utf-8$/.test(contentType)
+    ) {
       return res.text();
     }
     return res.arrayBuffer();
