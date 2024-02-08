@@ -21,7 +21,7 @@ function handleResponse(res) {
   }
   function checkContentType() {
     const contentType = res.headers.get('content-type');
-    if (/application\/json/.test(contentType)) {
+    if (/^application\/([\w\.]+\+)?json(;.*)?/.test(contentType)) {
       return res.json();
     }
     if (!contentType || /application\/xml/.test(contentType) || /^text\/|charset=utf-8$/.test(contentType)) {
