@@ -24,7 +24,7 @@ function handleResponse(res) {
     if (/^application\/([\w\.]+\+)?json(;.*)?/.test(contentType)) {
       return res.json();
     }
-    if (!contentType || /application\/xml/.test(contentType) || /^text\/|charset=utf-8$/.test(contentType)) {
+    if (!contentType || /^application\/([\w\.]+\+)?xml(;.*)?/.test(contentType) || /^text\/|charset=utf-8$/.test(contentType)) {
       return res.text();
     }
     return res.arrayBuffer();
