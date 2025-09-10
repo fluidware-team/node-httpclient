@@ -30,10 +30,14 @@ async function handleResponse<T>(res: Response): Promise<T> {
     return Promise.resolve(false as T);
   }
   const contentType = res.headers.get('content-type');
-  if (contentType && /application\/json/.test(contentType)) {
+  if (contentType && /^application\/([\w.]+\+)?json(;.*)?/.test(contentType)) {
     return (await res.json()) as T;
   }
-  if (!contentType || /^text\/|charset=utf-8$/.test(contentType)) {
+  if (
+    !contentType ||
+    /^application\/([\w.]+\+)?xml(;.*)?/.test(contentType) ||
+    /^text\/|charset=utf-8$/.test(contentType)
+  ) {
     return (await res.text()) as T;
   }
   return (await res.arrayBuffer()) as T;
