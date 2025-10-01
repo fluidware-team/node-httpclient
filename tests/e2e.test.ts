@@ -88,9 +88,9 @@ app.post('/post-empty', express.text(), express.json(), (req: Request, res: Resp
     res.status(400).json({ status: 400, reason: 'content-length greater than 0' });
     return;
   }
-  // express.json() put {} event if no body is present..
+  
   try {
-    expect(req.body).toEqual({});
+    expect(req.body).toBeUndefined()
   } catch (e) {
     res.status(400).json({ status: 400, reason: 'body is present' });
     return;
