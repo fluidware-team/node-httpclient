@@ -14,10 +14,65 @@
  * limitations under the License.
  */
 
-import { EnvParse } from '@fluidware-it/saddlebag';
-import { VERSION } from './version';
+import { _globalThis } from './globalThis';
+import { NAME, VERSION } from './version';
+
+interface FWHTTPConfig {
+  agentName: string;
+  agentVersion: string;
+}
 
 export const Config = {
-  agentName: EnvParse.envString('npm_package_name', '@fluidware-it/httpclient'),
-  agentVersion: EnvParse.envString('npm_package_version', VERSION)
+  // eslint-disable-next-line no-process-env
+  agentName: NAME,
+  // eslint-disable-next-line no-process-env
+  agentVersion: VERSION
 };
+
+const GLOBAL_FW_HTTPCLIENT_KEY = Symbol.for('fw.httpclient');
+
+type FWGlobal = {
+  [GLOBAL_FW_HTTPCLIENT_KEY]: FWHTTPConfig | undefined;
+};
+
+const _global = _globalThis as unknown as FWGlobal;
+
+export function resetFWHTTPConfig() {
+  if (_global[GLOBAL_FW_HTTPCLIENT_KEY]) {
+    delete _global[GLOBAL_FW_HTTPCLIENT_KEY];
+  }
+}
+
+export function setFWHTTPConfig(config: Partial<FWHTTPConfig>) {
+  if (!_global[GLOBAL_FW_HTTPCLIENT_KEY]) {
+    _global[GLOBAL_FW_HTTPCLIENT_KEY] = {
+      agentName: Config.agentName,
+      agentVersion: Config.agentVersion
+    };
+  }
+  if (config.agentName) {
+    _global[GLOBAL_FW_HTTPCLIENT_KEY].agentName = config.agentName;
+  } else {
+    _global[GLOBAL_FW_HTTPCLIENT_KEY].agentName = Config.agentName;
+  }
+  if (config.agentVersion) {
+    _global[GLOBAL_FW_HTTPCLIENT_KEY].agentVersion = config.agentVersion;
+  } else {
+    _global[GLOBAL_FW_HTTPCLIENT_KEY].agentVersion = Config.agentVersion;
+  }
+}
+
+export function getFWHTTPConfig(): FWHTTPConfig {
+  if (!_global[GLOBAL_FW_HTTPCLIENT_KEY]) {
+    _global[GLOBAL_FW_HTTPCLIENT_KEY] = {
+      agentName: Config.agentName,
+      agentVersion: Config.agentVersion
+    };
+  }
+  return _global[GLOBAL_FW_HTTPCLIENT_KEY];
+}
+
+export function getUserAgent(): string {
+  const config = getFWHTTPConfig();
+  return `${config.agentName}/${config.agentVersion}`;
+}

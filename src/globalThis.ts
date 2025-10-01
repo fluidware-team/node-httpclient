@@ -14,7 +14,4 @@
  * limitations under the License.
  */
 
-export * from './types';
-export { HTTPClientError } from './HTTPClientError';
-export { http_del, http_options, http_get, http_put, http_patch, http_head, http_post } from './HTTPClient';
-export { setFWHTTPConfig } from './config';
+export const _globalThis = typeof globalThis === 'object' ? globalThis : global;

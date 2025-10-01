@@ -15,10 +15,8 @@
  */
 
 import { HTTPClientError } from './HTTPClientError';
-import { Config } from './config';
+import { getUserAgent } from './config';
 import { FullResponse, HeadersResponse, Payload } from './types';
-
-const userAgent = `${Config.agentName}/${Config.agentVersion}`;
 
 function hasHeader(headers: HeadersInit, name: string) {
   return Object.keys(headers).some(header => header.toLowerCase() === name);
@@ -50,7 +48,7 @@ function handleHeaders(fetchOpts: RequestInit, headers: HeadersInit) {
     fetchOpts.headers = headers;
   }
   if (!hasHeader(fetchOpts.headers, 'user-agent')) {
-    Object.assign(fetchOpts.headers, { 'user-agent': userAgent });
+    Object.assign(fetchOpts.headers, { 'user-agent': getUserAgent() });
   }
 }
 

@@ -1,8 +1,9 @@
-const { http_get, http_head, http_options, http_post, http_put, http_patch, http_del } = require('../build/src');
+const { http_get, http_head, http_options, http_post, http_put, http_patch, http_del, setFWHTTPConfig } = require('../build/src');
 const express = require( 'express');
 const assert = require( 'assert');
 const { describe, it, before, after } = require('mocha');
 const path = require( 'path');
+const packageJson = require("../package.json");
 
 const app = express();
 
@@ -137,6 +138,11 @@ app.delete('/delete', express.json(), (req, res) => {
   }
   res.set(headerKey, headerValue).json(del_test);
 });
+
+app.get('/user-agent', (req, res) => {
+  res.json({ 'user-agent': req.get('user-agent') });
+});
+
 
 describe('e2e', function () {
   let port;
@@ -336,6 +342,39 @@ describe('e2e', function () {
         true
       );
       assert.deepStrictEqual(body, del_test);
+    });
+  });
+  describe('user agent', async () => {
+    afterEach(() => {
+      // reset user-agent to default
+      setFWHTTPConfig({
+        agentName: null,
+        agentVersion: null,
+      })
+    })
+    it ('should return a default user-agent', async () => {
+      const body = await http_get(`${url}/user-agent`);
+      const packageJson = require('../package.json');
+      assert.strictEqual(body['user-agent'], `${packageJson.name}/${packageJson.version}`);
+    });
+    it ('should return a custom user-agent', async () => {
+      setFWHTTPConfig({
+        agentName: 'test-agent',
+        agentVersion: '1.0.0',
+      })
+      const body = await http_get(`${url}/user-agent`);
+      assert.strictEqual(body['user-agent'], 'test-agent/1.0.0');
+    });
+    it ('should return a default user-agent (after reset)', async () => {
+      const body = await http_get(`${url}/user-agent`);
+      const packageJson = require('../package.json');
+      assert.strictEqual(body['user-agent'], `${packageJson.name}/${packageJson.version}`);
+    });
+    it ('should return the user-agent set into the header', async () => {
+      const body = await http_get(`${url}/user-agent`, { 'user-agent': 'manual-test-agent/9.8.7' });
+      assert.strictEqual(body['user-agent'], 'manual-test-agent/9.8.7');
+      const body2 = await http_get(`${url}/user-agent`, { 'User-Agent': 'manual-test-agent-2/8.7.6' });
+      assert.strictEqual(body2['user-agent'], 'manual-test-agent-2/8.7.6');
     });
   });
 });
