@@ -1,9 +1,10 @@
-const { http_get, http_head, http_options, http_post, http_put, http_patch, http_del, setFWHTTPConfig } = require('../build/src');
-const express = require( 'express');
-const assert = require( 'assert');
-const { describe, it, before, after } = require('mocha');
-const path = require( 'path');
-const packageJson = require("../package.json");
+import type { Request, Response } from 'express';
+import type { Server } from 'node:http';
+import type { AddressInfo } from 'node:net';
+import { http_get, http_head, http_options, http_post, http_put, http_patch, http_del, setFWHTTPConfig } from '../src';
+import * as express from 'express';
+import * as path from 'path';
+import { resetFWHTTPConfig } from '../src/config';
 
 const app = express();
 
@@ -22,140 +23,151 @@ const del_test = { del: true };
 const headerKey = 'x-test-header';
 const headerValue = 'fluidware srl';
 
-app.get('/', (req, res) => {
+app.get('/', (req: Request, res: Response) => {
   res.set(headerKey, headerValue).json(get_test);
 });
 
-app.head('/', (req, res) => {
+app.head('/', (req: Request, res: Response) => {
   res.set(headerKey, headerValue).status(200).send();
 });
 
-app.get('/headers', (req, res) => {
+app.get('/headers', (req: Request, res: Response) => {
   const header = req.get(headerKey);
   if (!header || header !== headerValue) {
-    return res.status(400).json({ status: 400, reason: 'missing required header x-test-header' });
+    res.status(400).json({ status: 400, reason: 'missing required header x-test-header' });
+    return;
   }
   res.set(headerKey, headerValue).json(get_test);
 });
 
-app.get('/redirect', (req, res) => {
+app.get('/redirect', (req: Request, res: Response) => {
   res.redirect('/');
 });
 
-app.get('/jpg', (req, res) => {
+app.get('/jpg', (req: Request, res: Response) => {
   res.sendFile(path.join(__dirname, 'unnamed.jpg'));
 });
 
-app.options('/', (req, res) => {
+app.options('/', (req: Request, res: Response) => {
   res.set(headerKey, headerValue).json(option_test);
 });
 
-app.options('/headers', (req, res) => {
+app.options('/headers', (req: Request, res: Response) => {
   const header = req.get(headerKey);
   if (!header || header !== headerValue) {
-    return res.status(400).json({ status: 400, reason: 'missing required header x-test-header' });
+    res.status(400).json({ status: 400, reason: 'missing required header x-test-header' });
+    return;
   }
   res.set(headerKey, headerValue).json(option_test);
 });
 
-app.options('/redirect', (req, res) => {
+app.options('/redirect', (req: Request, res: Response) => {
   res.redirect('/');
 });
 
-app.post('/', express.text(), (req, res) => {
+app.post('/', express.text(), (req: Request, res: Response) => {
   if (req.body !== 'test') {
-    return res.status(400).json({ status: 400, reason: 'missing required body' });
+    res.status(400).json({ status: 400, reason: 'missing required body' });
+    return;
   }
   res.set(headerKey, headerValue).json(post_test);
 });
 
-app.post('/post', express.json(), (req, res) => {
+app.post('/post', express.json(), (req: Request, res: Response) => {
   try {
-    assert.deepStrictEqual(req.body, { test: true });
+    expect(req.body).toEqual({ test: true });
   } catch (e) {
-    return res.status(400).json({ status: 400, reason: 'missing required body' });
+    res.status(400).json({ status: 400, reason: 'missing required body' });
+    return;
   }
   res.set(headerKey, headerValue).json(post_test);
 });
 
-app.post('/post-empty', express.text(), express.json(), (req, res) => {
-  if (req.get('content-length') > 0) {
-    return res.status(400).json({ status: 400, reason: 'content-length greater than 0' });
+app.post('/post-empty', express.text(), express.json(), (req: Request, res: Response) => {
+  if (Number(req.get('content-length') || 0) > 0) {
+    res.status(400).json({ status: 400, reason: 'content-length greater than 0' });
+    return;
   }
   // express.json() put {} event if no body is present..
   try {
-    assert.deepStrictEqual(req.body, {});
+    expect(req.body).toEqual({});
   } catch (e) {
-    return res.status(400).json({ status: 400, reason: 'body is present' });
+    res.status(400).json({ status: 400, reason: 'body is present' });
+    return;
   }
   res.set(headerKey, headerValue).json(post_test);
 });
 
-app.put('/', express.text(), (req, res) => {
+app.put('/', express.text(), (req: Request, res: Response) => {
   if (req.body !== 'test') {
-    return res.status(400).json({ status: 400, reason: 'missing required body' });
+    res.status(400).json({ status: 400, reason: 'missing required body' });
+    return;
   }
   res.set(headerKey, headerValue).json(put_test);
 });
 
-app.put('/put', express.json(), (req, res) => {
+app.put('/put', express.json(), (req: Request, res: Response) => {
   try {
-    assert.deepStrictEqual(req.body, { test: true });
+    expect(req.body).toEqual({ test: true });
   } catch (e) {
-    return res.status(400).json({ status: 400, reason: 'missing required body' });
+    res.status(400).json({ status: 400, reason: 'missing required body' });
+    return;
   }
   res.set(headerKey, headerValue).json(put_test);
 });
 
-app.patch('/', express.text(), (req, res) => {
+app.patch('/', express.text(), (req: Request, res: Response) => {
   if (req.body !== 'test') {
-    return res.status(400).json({ status: 400, reason: 'missing required body' });
+    res.status(400).json({ status: 400, reason: 'missing required body' });
+    return;
   }
   res.set(headerKey, headerValue).json(patch_test);
 });
 
-app.patch('/patch', express.json(), (req, res) => {
+app.patch('/patch', express.json(), (req: Request, res: Response) => {
   try {
-    assert.deepStrictEqual(req.body, { test: true });
+    expect(req.body).toEqual({ test: true });
   } catch (e) {
-    return res.status(400).json({ status: 400, reason: 'missing required body' });
+    res.status(400).json({ status: 400, reason: 'missing required body' });
+    return;
   }
   res.set(headerKey, headerValue).json(patch_test);
 });
 
-app.delete('/', express.text(), (req, res) => {
+app.delete('/', express.text(), (req: Request, res: Response) => {
   if (req.body !== 'test') {
-    return res.status(400).json({ status: 400, reason: 'missing required body' });
+    res.status(400).json({ status: 400, reason: 'missing required body' });
+    return;
   }
   res.set(headerKey, headerValue).json(del_test);
 });
 
-app.delete('/delete', express.json(), (req, res) => {
+app.delete('/delete', express.json(), (req: Request, res: Response) => {
   try {
-    assert.deepStrictEqual(req.body, { test: true });
+    expect(req.body).toEqual({ test: true });
   } catch (e) {
-    return res.status(400).json({ status: 400, reason: 'missing required body' });
+    res.status(400).json({ status: 400, reason: 'missing required body' });
+    return;
   }
   res.set(headerKey, headerValue).json(del_test);
 });
 
-app.get('/user-agent', (req, res) => {
+app.get('/user-agent', (req: Request, res: Response) => {
   res.json({ 'user-agent': req.get('user-agent') });
 });
 
-
 describe('e2e', function () {
-  let port;
-  let server;
-  let url;
-  before(done => {
+  let port: number;
+  let server: Server;
+  let url: string;
+  beforeAll(done => {
     server = app.listen(0, '127.0.0.1', () => {
-      port = server.address().port;
+      port = (server.address() as AddressInfo).port;
       url = `http://127.0.0.1:${port}`;
       done();
     });
   });
-  after(done => {
+  afterAll(done => {
     server.closeAllConnections();
     server.close(() => {
       done();
@@ -164,97 +176,94 @@ describe('e2e', function () {
   describe('http_get', function () {
     it('must return json body', async () => {
       const ret = await http_get(`${url}/`);
-      assert.deepStrictEqual(ret, get_test);
+      expect(ret).toEqual(get_test);
     });
     it('must return json body following redirect', async () => {
       const ret = await http_get(`${url}/redirect`);
-      assert.deepStrictEqual(ret, get_test);
+      expect(ret).toEqual(get_test);
     });
     it('must return nothing not following redirect', async () => {
       const ret = await http_get(`${url}/redirect`, undefined, { redirect: 'manual' });
-      assert.deepStrictEqual(ret, 'Found. Redirecting to /');
+      expect(ret).toEqual('Found. Redirecting to /');
     });
     it('must return json body sending custom header', async () => {
       const ret = await http_get(`${url}/headers`, { [headerKey]: headerValue });
-      assert.deepStrictEqual(ret, get_test);
+      expect(ret).toEqual(get_test);
     });
     it('must return an object with body and response headers ', async () => {
       const { body, headers } = await http_get(`${url}/`, true);
-      assert.deepStrictEqual(body, get_test);
-      assert.strictEqual(headers.get(headerKey), headerValue);
+      expect(body).toEqual(get_test);
+      expect(headers.get(headerKey)).toBe(headerValue);
     });
     it('must return an object with body and response headers v2', async () => {
       const { body, headers } = await http_get(`${url}/`, undefined, true);
-      assert.deepStrictEqual(body, get_test);
-      assert.strictEqual(headers.get(headerKey), headerValue);
+      expect(body).toEqual(get_test);
+      expect(headers.get(headerKey)).toBe(headerValue);
     });
     it('must return an arraybuffer', async () => {
       const ret = await http_get(`${url}/jpg`);
-      assert.deepStrictEqual(typeof ret, 'object');
+      expect(typeof ret).toBe('object');
     });
   });
   describe('http_head', function () {
     it('must return headers', async () => {
-      const { body, headers } = await http_head(`${url}/`);
-      assert.strictEqual(body, undefined);
-      assert.strictEqual(headers.get(headerKey), headerValue);
+      const res = await http_head(`${url}/`);
+      expect(res.headers.get(headerKey)).toBe(headerValue);
     });
     it('must return headers following redirect', async () => {
-      const { body, headers } = await http_head(`${url}/redirect`);
-      assert.strictEqual(body, undefined);
-      assert.strictEqual(headers.get('content-type'), 'application/json; charset=utf-8');
+      const { headers } = await http_head(`${url}/redirect`);
+      expect(headers.get('content-type')).toBe('application/json; charset=utf-8');
     });
     it('must return headers NOT following redirect', async () => {
-      const { body, headers } = await http_head(`${url}/redirect`, undefined, { redirect: 'manual' });
-      assert.strictEqual(body, undefined);
-      assert.strictEqual(headers.get('location'), '/');
-      assert.strictEqual(headers.get('content-type'), 'text/plain; charset=utf-8');
+      const { headers } = await http_head(`${url}/redirect`, undefined, { redirect: 'manual' });
+      expect(headers.get('location')).toBe('/');
+      expect(headers.get('content-type')).toBe('text/plain; charset=utf-8');
     });
   });
   describe('http_options', function () {
     it('must return json body', async () => {
       const ret = await http_options(`${url}/`);
-      assert.deepStrictEqual(ret, option_test);
+      expect(ret).toEqual(option_test);
     });
     it('must return json body following redirect', async () => {
       const ret = await http_options(`${url}/redirect`);
-      assert.deepStrictEqual(ret, option_test);
+      expect(ret).toEqual(option_test);
     });
     it('must return nothing not following redirect', async () => {
       const ret = await http_options(`${url}/redirect`, undefined, { redirect: 'manual' });
-      assert.deepStrictEqual(ret, 'Found. Redirecting to /');
+      expect(ret).toEqual('Found. Redirecting to /');
     });
     it('must return json body sending custom header', async () => {
       const ret = await http_options(`${url}/headers`, { [headerKey]: headerValue });
-      assert.deepStrictEqual(ret, option_test);
+      expect(ret).toEqual(option_test);
     });
     it('must return an object with body and response headers ', async () => {
       const { body, headers } = await http_options(`${url}/`, true);
-      assert.deepStrictEqual(body, option_test);
-      assert.strictEqual(headers.get(headerKey), headerValue);
+      expect(body).toEqual(option_test);
+      expect(headers.get(headerKey)).toBe(headerValue);
     });
     it('must return an object with body and response headers v2', async () => {
       const { body, headers } = await http_options(`${url}/`, undefined, true);
-      assert.deepStrictEqual(body, option_test);
-      assert.strictEqual(headers.get(headerKey), headerValue);
+      expect(body).toEqual(option_test);
+      expect(headers.get(headerKey)).toBe(headerValue);
     });
   });
   describe('http_post', function () {
     it('must return json body posting Buffer', async () => {
       const ret = await http_post(`${url}/`, Buffer.from('test', 'utf-8'), { 'content-type': 'text/plain' });
-      assert.deepStrictEqual(ret, post_test);
+      expect(ret).toEqual(post_test);
     });
     it('must return json body posting object', async () => {
       const { body } = await http_post(`${url}/post`, { test: true }, true);
-      assert.deepStrictEqual(body, post_test);
+      expect(body).toEqual(post_test);
     });
     it('must return json body', async () => {
       const { body } = await http_post(`${url}/`, Buffer.from('test', 'utf-8'), { 'content-type': 'text/plain' }, true);
-      assert.deepStrictEqual(body, post_test);
+      expect(body).toEqual(post_test);
     });
     it('must return json body - no payload', async () => {
       const body = await http_post(`${url}/post-empty`);
-      assert.deepStrictEqual(body, post_test);
+      expect(body).toEqual(post_test);
     });
     it('must return json body', async () => {
       const { body } = await http_post(
@@ -264,21 +273,21 @@ describe('e2e', function () {
         undefined,
         true
       );
-      assert.deepStrictEqual(body, post_test);
+      expect(body).toEqual(post_test);
     });
   });
   describe('http_put', function () {
     it('must return json body posting Buffer', async () => {
       const ret = await http_put(`${url}/`, Buffer.from('test', 'utf-8'), { 'content-type': 'text/plain' });
-      assert.deepStrictEqual(ret, put_test);
+      expect(ret).toEqual(put_test);
     });
     it('must return json body posting object', async () => {
       const { body } = await http_put(`${url}/put`, { test: true }, true);
-      assert.deepStrictEqual(body, put_test);
+      expect(body).toEqual(put_test);
     });
     it('must return json body', async () => {
       const { body } = await http_put(`${url}/`, Buffer.from('test', 'utf-8'), { 'content-type': 'text/plain' }, true);
-      assert.deepStrictEqual(body, put_test);
+      expect(body).toEqual(put_test);
     });
     it('must return json body', async () => {
       const { body } = await http_put(
@@ -288,17 +297,17 @@ describe('e2e', function () {
         undefined,
         true
       );
-      assert.deepStrictEqual(body, put_test);
+      expect(body).toEqual(put_test);
     });
   });
   describe('http_patch', function () {
     it('must return json body posting Buffer', async () => {
       const ret = await http_patch(`${url}/`, Buffer.from('test', 'utf-8'), { 'content-type': 'text/plain' });
-      assert.deepStrictEqual(ret, patch_test);
+      expect(ret).toEqual(patch_test);
     });
     it('must return json body posting object', async () => {
       const { body } = await http_patch(`${url}/patch`, { test: true }, true);
-      assert.deepStrictEqual(body, patch_test);
+      expect(body).toEqual(patch_test);
     });
     it('must return json body', async () => {
       const { body } = await http_patch(
@@ -307,7 +316,7 @@ describe('e2e', function () {
         { 'content-type': 'text/plain' },
         true
       );
-      assert.deepStrictEqual(body, patch_test);
+      expect(body).toEqual(patch_test);
     });
     it('must return json body', async () => {
       const { body } = await http_patch(
@@ -317,21 +326,21 @@ describe('e2e', function () {
         undefined,
         true
       );
-      assert.deepStrictEqual(body, patch_test);
+      expect(body).toEqual(patch_test);
     });
   });
   describe('http_del', function () {
     it('must return json body posting Buffer', async () => {
       const ret = await http_del(`${url}/`, Buffer.from('test', 'utf-8'), { 'content-type': 'text/plain' });
-      assert.deepStrictEqual(ret, del_test);
+      expect(ret).toEqual(del_test);
     });
     it('must return json body posting object', async () => {
       const { body } = await http_del(`${url}/delete`, { test: true }, true);
-      assert.deepStrictEqual(body, del_test);
+      expect(body).toEqual(del_test);
     });
     it('must return json body', async () => {
       const { body } = await http_del(`${url}/`, Buffer.from('test', 'utf-8'), { 'content-type': 'text/plain' }, true);
-      assert.deepStrictEqual(body, del_test);
+      expect(body).toEqual(del_test);
     });
     it('must return json body', async () => {
       const { body } = await http_del(
@@ -341,40 +350,42 @@ describe('e2e', function () {
         undefined,
         true
       );
-      assert.deepStrictEqual(body, del_test);
+      expect(body).toEqual(del_test);
     });
   });
-  describe('user agent', async () => {
+  describe('user agent', () => {
     afterEach(() => {
       // reset user-agent to default
-      setFWHTTPConfig({
-        agentName: null,
-        agentVersion: null,
-      })
-    })
-    it ('should return a default user-agent', async () => {
-      const body = await http_get(`${url}/user-agent`);
-      const packageJson = require('../package.json');
-      assert.strictEqual(body['user-agent'], `${packageJson.name}/${packageJson.version}`);
+      resetFWHTTPConfig();
+      setFWHTTPConfig({});
     });
-    it ('should return a custom user-agent', async () => {
+    it('should return a default user-agent', async () => {
+      const body = await http_get<{ 'user-agent': string }>(`${url}/user-agent`);
+      const packageJson = require('../package.json');
+      expect(body['user-agent']).toBe(`${packageJson.name}/${packageJson.version}`);
+    });
+    it('should return a custom user-agent', async () => {
       setFWHTTPConfig({
         agentName: 'test-agent',
-        agentVersion: '1.0.0',
-      })
-      const body = await http_get(`${url}/user-agent`);
-      assert.strictEqual(body['user-agent'], 'test-agent/1.0.0');
+        agentVersion: '1.0.0'
+      });
+      const body = await http_get<{ 'user-agent': string }>(`${url}/user-agent`);
+      expect(body['user-agent']).toBe('test-agent/1.0.0');
     });
-    it ('should return a default user-agent (after reset)', async () => {
-      const body = await http_get(`${url}/user-agent`);
+    it('should return a default user-agent (after reset)', async () => {
+      const body = await http_get<{ 'user-agent': string }>(`${url}/user-agent`);
       const packageJson = require('../package.json');
-      assert.strictEqual(body['user-agent'], `${packageJson.name}/${packageJson.version}`);
+      expect(body['user-agent']).toBe(`${packageJson.name}/${packageJson.version}`);
     });
-    it ('should return the user-agent set into the header', async () => {
-      const body = await http_get(`${url}/user-agent`, { 'user-agent': 'manual-test-agent/9.8.7' });
-      assert.strictEqual(body['user-agent'], 'manual-test-agent/9.8.7');
-      const body2 = await http_get(`${url}/user-agent`, { 'User-Agent': 'manual-test-agent-2/8.7.6' });
-      assert.strictEqual(body2['user-agent'], 'manual-test-agent-2/8.7.6');
+    it('should return the user-agent set into the header', async () => {
+      const body = await http_get<{ 'user-agent': string }>(`${url}/user-agent`, {
+        'user-agent': 'manual-test-agent/9.8.7'
+      });
+      expect(body['user-agent']).toBe('manual-test-agent/9.8.7');
+      const body2 = await http_get<{ 'user-agent': string }>(`${url}/user-agent`, {
+        'User-Agent': 'manual-test-agent-2/8.7.6'
+      });
+      expect(body2['user-agent']).toBe('manual-test-agent-2/8.7.6');
     });
   });
 });
