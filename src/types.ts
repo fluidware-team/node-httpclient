@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 export type Value =
   | string
   | number
@@ -23,7 +24,7 @@ export type Value =
     }
   | Value[];
 
-export type Payload = BodyInit | Value;
+export type Payload = globalThis.BodyInit | Value;
 
 export type HeadersResponse = {
   headers: Headers;

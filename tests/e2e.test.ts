@@ -76,7 +76,7 @@ app.post('/', express.text(), (req: Request, res: Response) => {
 app.post('/post', express.json(), (req: Request, res: Response) => {
   try {
     expect(req.body).toEqual({ test: true });
-  } catch (e) {
+  } catch (_e) {
     res.status(400).json({ status: 400, reason: 'missing required body' });
     return;
   }
@@ -88,10 +88,10 @@ app.post('/post-empty', express.text(), express.json(), (req: Request, res: Resp
     res.status(400).json({ status: 400, reason: 'content-length greater than 0' });
     return;
   }
-  
+
   try {
-    expect(req.body).toBeUndefined()
-  } catch (e) {
+    expect(req.body).toBeUndefined();
+  } catch (_e) {
     res.status(400).json({ status: 400, reason: 'body is present' });
     return;
   }
@@ -109,7 +109,7 @@ app.put('/', express.text(), (req: Request, res: Response) => {
 app.put('/put', express.json(), (req: Request, res: Response) => {
   try {
     expect(req.body).toEqual({ test: true });
-  } catch (e) {
+  } catch (_e) {
     res.status(400).json({ status: 400, reason: 'missing required body' });
     return;
   }
@@ -127,7 +127,7 @@ app.patch('/', express.text(), (req: Request, res: Response) => {
 app.patch('/patch', express.json(), (req: Request, res: Response) => {
   try {
     expect(req.body).toEqual({ test: true });
-  } catch (e) {
+  } catch (_e) {
     res.status(400).json({ status: 400, reason: 'missing required body' });
     return;
   }
@@ -145,7 +145,7 @@ app.delete('/', express.text(), (req: Request, res: Response) => {
 app.delete('/delete', express.json(), (req: Request, res: Response) => {
   try {
     expect(req.body).toEqual({ test: true });
-  } catch (e) {
+  } catch (_e) {
     res.status(400).json({ status: 400, reason: 'missing required body' });
     return;
   }

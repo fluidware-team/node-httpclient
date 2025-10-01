@@ -18,7 +18,7 @@ import { HTTPClientError } from './HTTPClientError';
 import { getUserAgent } from './config';
 import { FullResponse, HeadersResponse, Payload } from './types';
 
-function hasHeader(headers: HeadersInit, name: string) {
+function hasHeader(headers: globalThis.HeadersInit, name: string) {
   return Object.keys(headers).some(header => header.toLowerCase() === name);
 }
 
@@ -41,7 +41,7 @@ async function handleResponse<T>(res: Response): Promise<T> {
   return (await res.arrayBuffer()) as T;
 }
 
-function handleHeaders(fetchOpts: RequestInit, headers: HeadersInit) {
+function handleHeaders(fetchOpts: globalThis.RequestInit, headers: globalThis.HeadersInit) {
   if (fetchOpts.headers) {
     Object.assign(fetchOpts.headers, headers);
   } else {
@@ -52,7 +52,7 @@ function handleHeaders(fetchOpts: RequestInit, headers: HeadersInit) {
   }
 }
 
-function handlePayload(fetchOpts: RequestInit, data: Payload) {
+function handlePayload(fetchOpts: globalThis.RequestInit, data: Payload) {
   if (data instanceof Buffer) {
     fetchOpts.body = data;
     return;
@@ -69,42 +69,42 @@ function handlePayload(fetchOpts: RequestInit, data: Payload) {
       'content-type': 'application/json;charset=utf-8'
     });
   }
-  fetchOpts.body = data as BodyInit;
+  fetchOpts.body = data as globalThis.BodyInit;
 }
 
 function execute(
   method: 'HEAD',
-  path: RequestInfo,
+  path: globalThis.RequestInfo,
   data: undefined,
-  reqHeaders: HeadersInit,
-  fetchOpts: RequestInit,
+  reqHeaders: globalThis.HeadersInit,
+  fetchOpts: globalThis.RequestInit,
   returnAlsoHeaders: true
 ): Promise<HeadersResponse>;
 
 function execute<T>(
   method: 'GET' | 'OPTIONS',
-  path: RequestInfo,
+  path: globalThis.RequestInfo,
   data: undefined,
-  reqHeaders: HeadersInit,
-  fetchOpts: RequestInit,
+  reqHeaders: globalThis.HeadersInit,
+  fetchOpts: globalThis.RequestInit,
   returnAlsoHeaders: boolean
 ): Promise<T | FullResponse<T>>;
 
 function execute<T>(
   method: 'POST' | 'PUT' | 'PATCH' | 'DELETE',
-  path: RequestInfo,
+  path: globalThis.RequestInfo,
   data: Payload | undefined,
-  reqHeaders: HeadersInit,
-  fetchOpts: RequestInit,
+  reqHeaders: globalThis.HeadersInit,
+  fetchOpts: globalThis.RequestInit,
   returnAlsoHeaders: boolean
 ): Promise<T | FullResponse<T>>;
 
 async function execute<T>(
   method: string,
-  path: RequestInfo,
+  path: globalThis.RequestInfo,
   data: Payload | undefined,
-  reqHeaders = {} as HeadersInit,
-  fetchOpts = {} as RequestInit,
+  reqHeaders = {} as globalThis.HeadersInit,
+  fetchOpts = {} as globalThis.RequestInit,
   returnAlsoHeaders: boolean
 ): Promise<HeadersResponse | FullResponse<T> | T> {
   fetchOpts.method = method;
@@ -142,40 +142,58 @@ async function execute<T>(
   return handleReturn();
 }
 
-export async function http_head(path: RequestInfo, headers?: HeadersInit, fetchOpts?: RequestInit) {
-  return execute('HEAD', path, undefined, headers || ({} as HeadersInit), fetchOpts || ({} as RequestInit), true);
+export async function http_head(
+  path: globalThis.RequestInfo,
+  headers?: globalThis.HeadersInit,
+  fetchOpts?: globalThis.RequestInit
+) {
+  return execute(
+    'HEAD',
+    path,
+    undefined,
+    headers || ({} as globalThis.HeadersInit),
+    fetchOpts || ({} as globalThis.RequestInit),
+    true
+  );
 }
 
-export async function http_options<T>(path: RequestInfo, returnAlsoHeaders?: false): Promise<T>;
-export async function http_options<T>(path: RequestInfo, returnAlsoHeaders?: true): Promise<FullResponse<T>>;
-export async function http_options<T>(path: RequestInfo, returnAlsoHeaders?: boolean): Promise<FullResponse<T>>;
-export async function http_options<T>(path: RequestInfo, headers?: HeadersInit, returnAlsoHeaders?: false): Promise<T>;
+export async function http_options<T>(path: globalThis.RequestInfo, returnAlsoHeaders?: false): Promise<T>;
+export async function http_options<T>(path: globalThis.RequestInfo, returnAlsoHeaders?: true): Promise<FullResponse<T>>;
 export async function http_options<T>(
-  path: RequestInfo,
-  headers?: HeadersInit,
-  returnAlsoHeaders?: true
-): Promise<FullResponse<T>>;
-export async function http_options<T>(
-  path: RequestInfo,
-  headers?: HeadersInit,
+  path: globalThis.RequestInfo,
   returnAlsoHeaders?: boolean
 ): Promise<FullResponse<T>>;
 export async function http_options<T>(
-  path: RequestInfo,
-  headers?: HeadersInit,
-  fetchOpts?: RequestInit,
+  path: globalThis.RequestInfo,
+  headers?: globalThis.HeadersInit,
   returnAlsoHeaders?: false
 ): Promise<T>;
 export async function http_options<T>(
-  path: RequestInfo,
-  headers?: HeadersInit,
-  fetchOpts?: RequestInit,
+  path: globalThis.RequestInfo,
+  headers?: globalThis.HeadersInit,
   returnAlsoHeaders?: true
 ): Promise<FullResponse<T>>;
 export async function http_options<T>(
-  path: RequestInfo,
-  headers?: HeadersInit | boolean,
-  fetchOpts?: RequestInit | boolean,
+  path: globalThis.RequestInfo,
+  headers?: globalThis.HeadersInit,
+  returnAlsoHeaders?: boolean
+): Promise<FullResponse<T>>;
+export async function http_options<T>(
+  path: globalThis.RequestInfo,
+  headers?: globalThis.HeadersInit,
+  fetchOpts?: globalThis.RequestInit,
+  returnAlsoHeaders?: false
+): Promise<T>;
+export async function http_options<T>(
+  path: globalThis.RequestInfo,
+  headers?: globalThis.HeadersInit,
+  fetchOpts?: globalThis.RequestInit,
+  returnAlsoHeaders?: true
+): Promise<FullResponse<T>>;
+export async function http_options<T>(
+  path: globalThis.RequestInfo,
+  headers?: globalThis.HeadersInit | boolean,
+  fetchOpts?: globalThis.RequestInit | boolean,
   returnAlsoHeaders?: boolean
 ) {
   if (typeof headers === 'boolean') {
@@ -190,41 +208,45 @@ export async function http_options<T>(
     'OPTIONS',
     path,
     undefined,
-    headers || ({} as HeadersInit),
-    fetchOpts || ({} as RequestInit),
+    headers || ({} as globalThis.HeadersInit),
+    fetchOpts || ({} as globalThis.RequestInit),
     !!returnAlsoHeaders
   );
 }
-export async function http_get<T>(path: RequestInfo, returnAlsoHeaders?: false): Promise<T>;
-export async function http_get<T>(path: RequestInfo, returnAlsoHeaders?: true): Promise<FullResponse<T>>;
-export async function http_get<T>(path: RequestInfo, returnAlsoHeaders?: boolean): Promise<FullResponse<T>>;
-export async function http_get<T>(path: RequestInfo, headers?: HeadersInit, returnAlsoHeaders?: false): Promise<T>;
+export async function http_get<T>(path: globalThis.RequestInfo, returnAlsoHeaders?: false): Promise<T>;
+export async function http_get<T>(path: globalThis.RequestInfo, returnAlsoHeaders?: true): Promise<FullResponse<T>>;
+export async function http_get<T>(path: globalThis.RequestInfo, returnAlsoHeaders?: boolean): Promise<FullResponse<T>>;
 export async function http_get<T>(
-  path: RequestInfo,
-  headers?: HeadersInit,
-  returnAlsoHeaders?: true
-): Promise<FullResponse<T>>;
-export async function http_get<T>(
-  path: RequestInfo,
-  headers?: HeadersInit,
-  returnAlsoHeaders?: boolean
-): Promise<FullResponse<T>>;
-export async function http_get<T>(
-  path: RequestInfo,
-  headers?: HeadersInit,
-  fetchOpts?: RequestInit,
+  path: globalThis.RequestInfo,
+  headers?: globalThis.HeadersInit,
   returnAlsoHeaders?: false
 ): Promise<T>;
 export async function http_get<T>(
-  path: RequestInfo,
-  headers?: HeadersInit,
-  fetchOpts?: RequestInit,
+  path: globalThis.RequestInfo,
+  headers?: globalThis.HeadersInit,
   returnAlsoHeaders?: true
 ): Promise<FullResponse<T>>;
 export async function http_get<T>(
-  path: RequestInfo,
-  headers?: HeadersInit | boolean,
-  fetchOpts?: RequestInit | boolean,
+  path: globalThis.RequestInfo,
+  headers?: globalThis.HeadersInit,
+  returnAlsoHeaders?: boolean
+): Promise<FullResponse<T>>;
+export async function http_get<T>(
+  path: globalThis.RequestInfo,
+  headers?: globalThis.HeadersInit,
+  fetchOpts?: globalThis.RequestInit,
+  returnAlsoHeaders?: false
+): Promise<T>;
+export async function http_get<T>(
+  path: globalThis.RequestInfo,
+  headers?: globalThis.HeadersInit,
+  fetchOpts?: globalThis.RequestInit,
+  returnAlsoHeaders?: true
+): Promise<FullResponse<T>>;
+export async function http_get<T>(
+  path: globalThis.RequestInfo,
+  headers?: globalThis.HeadersInit | boolean,
+  fetchOpts?: globalThis.RequestInit | boolean,
   returnAlsoHeaders?: boolean
 ) {
   if (typeof headers === 'boolean') {
@@ -239,60 +261,60 @@ export async function http_get<T>(
     'GET',
     path,
     undefined,
-    headers || ({} as HeadersInit),
-    fetchOpts || ({} as RequestInit),
+    headers || ({} as globalThis.HeadersInit),
+    fetchOpts || ({} as globalThis.RequestInit),
     !!returnAlsoHeaders
   );
 }
 
-export async function http_post<T>(path: RequestInfo, data?: Payload, returnAlsoHeaders?: false): Promise<T>;
+export async function http_post<T>(path: globalThis.RequestInfo, data?: Payload, returnAlsoHeaders?: false): Promise<T>;
 export async function http_post<T>(
-  path: RequestInfo,
+  path: globalThis.RequestInfo,
   data?: Payload,
   returnAlsoHeaders?: true
 ): Promise<FullResponse<T>>;
 export async function http_post<T>(
-  path: RequestInfo,
+  path: globalThis.RequestInfo,
   data?: Payload,
   returnAlsoHeaders?: boolean
 ): Promise<FullResponse<T>>;
 export async function http_post<T>(
-  path: RequestInfo,
+  path: globalThis.RequestInfo,
   data?: Payload,
-  headers?: HeadersInit,
+  headers?: globalThis.HeadersInit,
   returnAlsoHeaders?: false
 ): Promise<T>;
 export async function http_post<T>(
-  path: RequestInfo,
+  path: globalThis.RequestInfo,
   data?: Payload,
-  headers?: HeadersInit,
+  headers?: globalThis.HeadersInit,
   returnAlsoHeaders?: true
 ): Promise<FullResponse<T>>;
 export async function http_post<T>(
-  path: RequestInfo,
+  path: globalThis.RequestInfo,
   data?: Payload,
-  headers?: HeadersInit,
+  headers?: globalThis.HeadersInit,
   returnAlsoHeaders?: boolean
 ): Promise<FullResponse<T>>;
 export async function http_post<T>(
-  path: RequestInfo,
+  path: globalThis.RequestInfo,
   data?: Payload,
-  headers?: HeadersInit,
-  fetchOpts?: RequestInit,
+  headers?: globalThis.HeadersInit,
+  fetchOpts?: globalThis.RequestInit,
   returnAlsoHeaders?: false
 ): Promise<T>;
 export async function http_post<T>(
-  path: RequestInfo,
+  path: globalThis.RequestInfo,
   data?: Payload,
-  headers?: HeadersInit,
-  fetchOpts?: RequestInit,
+  headers?: globalThis.HeadersInit,
+  fetchOpts?: globalThis.RequestInit,
   returnAlsoHeaders?: true
 ): Promise<FullResponse<T>>;
 export async function http_post<T>(
-  path: RequestInfo,
+  path: globalThis.RequestInfo,
   data?: Payload,
-  headers?: HeadersInit | boolean,
-  fetchOpts?: RequestInit | boolean,
+  headers?: globalThis.HeadersInit | boolean,
+  fetchOpts?: globalThis.RequestInit | boolean,
   returnAlsoHeaders?: boolean
 ) {
   if (typeof headers === 'boolean') {
@@ -307,60 +329,60 @@ export async function http_post<T>(
     'POST',
     path,
     data,
-    headers || ({} as HeadersInit),
-    fetchOpts || ({} as RequestInit),
+    headers || ({} as globalThis.HeadersInit),
+    fetchOpts || ({} as globalThis.RequestInit),
     !!returnAlsoHeaders
   );
 }
 
-export async function http_put<T>(path: RequestInfo, data?: Payload, returnAlsoHeaders?: false): Promise<T>;
+export async function http_put<T>(path: globalThis.RequestInfo, data?: Payload, returnAlsoHeaders?: false): Promise<T>;
 export async function http_put<T>(
-  path: RequestInfo,
+  path: globalThis.RequestInfo,
   data?: Payload,
   returnAlsoHeaders?: true
 ): Promise<FullResponse<T>>;
 export async function http_put<T>(
-  path: RequestInfo,
+  path: globalThis.RequestInfo,
   data?: Payload,
   returnAlsoHeaders?: boolean
 ): Promise<FullResponse<T>>;
 export async function http_put<T>(
-  path: RequestInfo,
+  path: globalThis.RequestInfo,
   data?: Payload,
-  headers?: HeadersInit,
+  headers?: globalThis.HeadersInit,
   returnAlsoHeaders?: false
 ): Promise<T>;
 export async function http_put<T>(
-  path: RequestInfo,
+  path: globalThis.RequestInfo,
   data?: Payload,
-  headers?: HeadersInit,
+  headers?: globalThis.HeadersInit,
   returnAlsoHeaders?: true
 ): Promise<FullResponse<T>>;
 export async function http_put<T>(
-  path: RequestInfo,
+  path: globalThis.RequestInfo,
   data?: Payload,
-  headers?: HeadersInit,
+  headers?: globalThis.HeadersInit,
   returnAlsoHeaders?: boolean
 ): Promise<FullResponse<T>>;
 export async function http_put<T>(
-  path: RequestInfo,
+  path: globalThis.RequestInfo,
   data?: Payload,
-  headers?: HeadersInit,
-  fetchOpts?: RequestInit,
+  headers?: globalThis.HeadersInit,
+  fetchOpts?: globalThis.RequestInit,
   returnAlsoHeaders?: false
 ): Promise<T>;
 export async function http_put<T>(
-  path: RequestInfo,
+  path: globalThis.RequestInfo,
   data?: Payload,
-  headers?: HeadersInit,
-  fetchOpts?: RequestInit,
+  headers?: globalThis.HeadersInit,
+  fetchOpts?: globalThis.RequestInit,
   returnAlsoHeaders?: true
 ): Promise<FullResponse<T>>;
 export async function http_put<T>(
-  path: RequestInfo,
+  path: globalThis.RequestInfo,
   data?: Payload,
-  headers?: HeadersInit | boolean,
-  fetchOpts?: RequestInit | boolean,
+  headers?: globalThis.HeadersInit | boolean,
+  fetchOpts?: globalThis.RequestInit | boolean,
   returnAlsoHeaders?: boolean
 ) {
   if (typeof headers === 'boolean') {
@@ -375,60 +397,64 @@ export async function http_put<T>(
     'PUT',
     path,
     data,
-    headers || ({} as HeadersInit),
-    fetchOpts || ({} as RequestInit),
+    headers || ({} as globalThis.HeadersInit),
+    fetchOpts || ({} as globalThis.RequestInit),
     !!returnAlsoHeaders
   );
 }
 
-export async function http_patch<T>(path: RequestInfo, data?: Payload, returnAlsoHeaders?: false): Promise<T>;
 export async function http_patch<T>(
-  path: RequestInfo,
+  path: globalThis.RequestInfo,
+  data?: Payload,
+  returnAlsoHeaders?: false
+): Promise<T>;
+export async function http_patch<T>(
+  path: globalThis.RequestInfo,
   data?: Payload,
   returnAlsoHeaders?: true
 ): Promise<FullResponse<T>>;
 export async function http_patch<T>(
-  path: RequestInfo,
+  path: globalThis.RequestInfo,
   data?: Payload,
   returnAlsoHeaders?: boolean
 ): Promise<FullResponse<T>>;
 export async function http_patch<T>(
-  path: RequestInfo,
+  path: globalThis.RequestInfo,
   data?: Payload,
-  headers?: HeadersInit,
+  headers?: globalThis.HeadersInit,
   returnAlsoHeaders?: false
 ): Promise<T>;
 export async function http_patch<T>(
-  path: RequestInfo,
+  path: globalThis.RequestInfo,
   data?: Payload,
-  headers?: HeadersInit,
+  headers?: globalThis.HeadersInit,
   returnAlsoHeaders?: true
 ): Promise<FullResponse<T>>;
 export async function http_patch<T>(
-  path: RequestInfo,
+  path: globalThis.RequestInfo,
   data?: Payload,
-  headers?: HeadersInit,
+  headers?: globalThis.HeadersInit,
   returnAlsoHeaders?: boolean
 ): Promise<FullResponse<T>>;
 export async function http_patch<T>(
-  path: RequestInfo,
+  path: globalThis.RequestInfo,
   data?: Payload,
-  headers?: HeadersInit,
-  fetchOpts?: RequestInit,
+  headers?: globalThis.HeadersInit,
+  fetchOpts?: globalThis.RequestInit,
   returnAlsoHeaders?: false
 ): Promise<T>;
 export async function http_patch<T>(
-  path: RequestInfo,
+  path: globalThis.RequestInfo,
   data?: Payload,
-  headers?: HeadersInit,
-  fetchOpts?: RequestInit,
+  headers?: globalThis.HeadersInit,
+  fetchOpts?: globalThis.RequestInit,
   returnAlsoHeaders?: true
 ): Promise<FullResponse<T>>;
 export async function http_patch<T>(
-  path: RequestInfo,
+  path: globalThis.RequestInfo,
   data?: Payload,
-  headers?: HeadersInit | boolean,
-  fetchOpts?: RequestInit | boolean,
+  headers?: globalThis.HeadersInit | boolean,
+  fetchOpts?: globalThis.RequestInit | boolean,
   returnAlsoHeaders?: boolean
 ) {
   if (typeof headers === 'boolean') {
@@ -443,60 +469,60 @@ export async function http_patch<T>(
     'PATCH',
     path,
     data,
-    headers || ({} as HeadersInit),
-    fetchOpts || ({} as RequestInit),
+    headers || ({} as globalThis.HeadersInit),
+    fetchOpts || ({} as globalThis.RequestInit),
     !!returnAlsoHeaders
   );
 }
 
-export async function http_del<T>(path: RequestInfo, data?: Payload, returnAlsoHeaders?: false): Promise<T>;
+export async function http_del<T>(path: globalThis.RequestInfo, data?: Payload, returnAlsoHeaders?: false): Promise<T>;
 export async function http_del<T>(
-  path: RequestInfo,
+  path: globalThis.RequestInfo,
   data?: Payload,
   returnAlsoHeaders?: true
 ): Promise<FullResponse<T>>;
 export async function http_del<T>(
-  path: RequestInfo,
+  path: globalThis.RequestInfo,
   data?: Payload,
   returnAlsoHeaders?: boolean
 ): Promise<FullResponse<T>>;
 export async function http_del<T>(
-  path: RequestInfo,
+  path: globalThis.RequestInfo,
   data?: Payload,
-  headers?: HeadersInit,
+  headers?: globalThis.HeadersInit,
   returnAlsoHeaders?: false
 ): Promise<T>;
 export async function http_del<T>(
-  path: RequestInfo,
+  path: globalThis.RequestInfo,
   data?: Payload,
-  headers?: HeadersInit,
+  headers?: globalThis.HeadersInit,
   returnAlsoHeaders?: true
 ): Promise<FullResponse<T>>;
 export async function http_del<T>(
-  path: RequestInfo,
+  path: globalThis.RequestInfo,
   data?: Payload,
-  headers?: HeadersInit,
+  headers?: globalThis.HeadersInit,
   returnAlsoHeaders?: boolean
 ): Promise<FullResponse<T>>;
 export async function http_del<T>(
-  path: RequestInfo,
+  path: globalThis.RequestInfo,
   data?: Payload,
-  headers?: HeadersInit,
-  fetchOpts?: RequestInit,
+  headers?: globalThis.HeadersInit,
+  fetchOpts?: globalThis.RequestInit,
   returnAlsoHeaders?: false
 ): Promise<T>;
 export async function http_del<T>(
-  path: RequestInfo,
+  path: globalThis.RequestInfo,
   data?: Payload,
-  headers?: HeadersInit,
-  fetchOpts?: RequestInit,
+  headers?: globalThis.HeadersInit,
+  fetchOpts?: globalThis.RequestInit,
   returnAlsoHeaders?: true
 ): Promise<FullResponse<T>>;
 export async function http_del<T>(
-  path: RequestInfo,
+  path: globalThis.RequestInfo,
   data?: Payload,
-  headers?: HeadersInit | boolean,
-  fetchOpts?: RequestInit | boolean,
+  headers?: globalThis.HeadersInit | boolean,
+  fetchOpts?: globalThis.RequestInit | boolean,
   returnAlsoHeaders?: boolean
 ) {
   if (typeof headers === 'boolean') {
@@ -511,8 +537,8 @@ export async function http_del<T>(
     'DELETE',
     path,
     data,
-    headers || ({} as HeadersInit),
-    fetchOpts || ({} as RequestInit),
+    headers || ({} as globalThis.HeadersInit),
+    fetchOpts || ({} as globalThis.RequestInit),
     !!returnAlsoHeaders
   );
 }

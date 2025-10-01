@@ -23,10 +23,10 @@ interface FWHTTPConfig {
 }
 
 export const Config = {
-  // eslint-disable-next-line no-process-env
-  agentName: NAME,
-  // eslint-disable-next-line no-process-env
-  agentVersion: VERSION
+  // eslint-disable-next-line n/no-process-env
+  agentName: process.env.npm_package_name || NAME,
+  // eslint-disable-next-line n/no-process-env
+  agentVersion: process.env.npm_package_version || VERSION
 };
 
 const GLOBAL_FW_HTTPCLIENT_KEY = Symbol.for('fw.httpclient');
