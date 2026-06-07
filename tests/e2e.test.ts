@@ -1,4 +1,4 @@
-import type { Request, Response } from 'express';
+import type { Request, Response as ServerResponse } from 'express';
 import type { Server } from 'node:http';
 import type { AddressInfo } from 'node:net';
 import { http_get, http_head, http_options, http_post, http_put, http_patch, http_del, setFWHTTPConfig } from '../src';
@@ -23,15 +23,15 @@ const del_test = { del: true };
 const headerKey = 'x-test-header';
 const headerValue = 'fluidware srl';
 
-app.get('/', (req: Request, res: Response) => {
+app.get('/', (req: Request, res: ServerResponse) => {
   res.set(headerKey, headerValue).json(get_test);
 });
 
-app.head('/', (req: Request, res: Response) => {
+app.head('/', (req: Request, res: ServerResponse) => {
   res.set(headerKey, headerValue).status(200).send();
 });
 
-app.get('/headers', (req: Request, res: Response) => {
+app.get('/headers', (req: Request, res: ServerResponse) => {
   const header = req.get(headerKey);
   if (!header || header !== headerValue) {
     res.status(400).json({ status: 400, reason: 'missing required header x-test-header' });
@@ -40,19 +40,19 @@ app.get('/headers', (req: Request, res: Response) => {
   res.set(headerKey, headerValue).json(get_test);
 });
 
-app.get('/redirect', (req: Request, res: Response) => {
+app.get('/redirect', (req: Request, res: ServerResponse) => {
   res.redirect('/');
 });
 
-app.get('/jpg', (req: Request, res: Response) => {
+app.get('/jpg', (req: Request, res: ServerResponse) => {
   res.sendFile(path.join(__dirname, 'unnamed.jpg'));
 });
 
-app.options('/', (req: Request, res: Response) => {
+app.options('/', (req: Request, res: ServerResponse) => {
   res.set(headerKey, headerValue).json(option_test);
 });
 
-app.options('/headers', (req: Request, res: Response) => {
+app.options('/headers', (req: Request, res: ServerResponse) => {
   const header = req.get(headerKey);
   if (!header || header !== headerValue) {
     res.status(400).json({ status: 400, reason: 'missing required header x-test-header' });
@@ -61,11 +61,11 @@ app.options('/headers', (req: Request, res: Response) => {
   res.set(headerKey, headerValue).json(option_test);
 });
 
-app.options('/redirect', (req: Request, res: Response) => {
+app.options('/redirect', (req: Request, res: ServerResponse) => {
   res.redirect('/');
 });
 
-app.post('/', express.text(), (req: Request, res: Response) => {
+app.post('/', express.text(), (req: Request, res: ServerResponse) => {
   if (req.body !== 'test') {
     res.status(400).json({ status: 400, reason: 'missing required body' });
     return;
@@ -73,7 +73,7 @@ app.post('/', express.text(), (req: Request, res: Response) => {
   res.set(headerKey, headerValue).json(post_test);
 });
 
-app.post('/post', express.json(), (req: Request, res: Response) => {
+app.post('/post', express.json(), (req: Request, res: ServerResponse) => {
   try {
     expect(req.body).toEqual({ test: true });
   } catch (_e) {
@@ -83,7 +83,7 @@ app.post('/post', express.json(), (req: Request, res: Response) => {
   res.set(headerKey, headerValue).json(post_test);
 });
 
-app.post('/post-empty', express.text(), express.json(), (req: Request, res: Response) => {
+app.post('/post-empty', express.text(), express.json(), (req: Request, res: ServerResponse) => {
   if (Number(req.get('content-length') || 0) > 0) {
     res.status(400).json({ status: 400, reason: 'content-length greater than 0' });
     return;
@@ -98,7 +98,7 @@ app.post('/post-empty', express.text(), express.json(), (req: Request, res: Resp
   res.set(headerKey, headerValue).json(post_test);
 });
 
-app.put('/', express.text(), (req: Request, res: Response) => {
+app.put('/', express.text(), (req: Request, res: ServerResponse) => {
   if (req.body !== 'test') {
     res.status(400).json({ status: 400, reason: 'missing required body' });
     return;
@@ -106,7 +106,7 @@ app.put('/', express.text(), (req: Request, res: Response) => {
   res.set(headerKey, headerValue).json(put_test);
 });
 
-app.put('/put', express.json(), (req: Request, res: Response) => {
+app.put('/put', express.json(), (req: Request, res: ServerResponse) => {
   try {
     expect(req.body).toEqual({ test: true });
   } catch (_e) {
@@ -116,7 +116,7 @@ app.put('/put', express.json(), (req: Request, res: Response) => {
   res.set(headerKey, headerValue).json(put_test);
 });
 
-app.patch('/', express.text(), (req: Request, res: Response) => {
+app.patch('/', express.text(), (req: Request, res: ServerResponse) => {
   if (req.body !== 'test') {
     res.status(400).json({ status: 400, reason: 'missing required body' });
     return;
@@ -124,7 +124,7 @@ app.patch('/', express.text(), (req: Request, res: Response) => {
   res.set(headerKey, headerValue).json(patch_test);
 });
 
-app.patch('/patch', express.json(), (req: Request, res: Response) => {
+app.patch('/patch', express.json(), (req: Request, res: ServerResponse) => {
   try {
     expect(req.body).toEqual({ test: true });
   } catch (_e) {
@@ -134,7 +134,7 @@ app.patch('/patch', express.json(), (req: Request, res: Response) => {
   res.set(headerKey, headerValue).json(patch_test);
 });
 
-app.delete('/', express.text(), (req: Request, res: Response) => {
+app.delete('/', express.text(), (req: Request, res: ServerResponse) => {
   if (req.body !== 'test') {
     res.status(400).json({ status: 400, reason: 'missing required body' });
     return;
@@ -142,7 +142,7 @@ app.delete('/', express.text(), (req: Request, res: Response) => {
   res.set(headerKey, headerValue).json(del_test);
 });
 
-app.delete('/delete', express.json(), (req: Request, res: Response) => {
+app.delete('/delete', express.json(), (req: Request, res: ServerResponse) => {
   try {
     expect(req.body).toEqual({ test: true });
   } catch (_e) {
@@ -152,7 +152,7 @@ app.delete('/delete', express.json(), (req: Request, res: Response) => {
   res.set(headerKey, headerValue).json(del_test);
 });
 
-app.get('/user-agent', (req: Request, res: Response) => {
+app.get('/user-agent', (req: Request, res: ServerResponse) => {
   res.json({ 'user-agent': req.get('user-agent') });
 });
 
@@ -203,6 +203,44 @@ describe('e2e', function () {
     it('must return an arraybuffer', async () => {
       const ret = await http_get(`${url}/jpg`);
       expect(typeof ret).toBe('object');
+    });
+    it('must throw an Error if path is not found', async () => {
+      try {
+        await http_get(`${url}/nonexistent`);
+        throw new Error('Expected http_get to throw an error');
+      } catch (e) {
+        expect(e.message).toBe('Not Found');
+        expect(e.statusCode).toBeDefined();
+        expect(e.getStatusCode()).toBe(404);
+        expect(e.httpResponse).toBeDefined();
+        const failedResponse: Response = e.getHttpResponse();
+        expect(failedResponse).toBeDefined();
+        const rawBody = await failedResponse.text();
+        expect(rawBody.toString()).toMatch('Cannot GET /nonexistent');
+      }
+      await expect(http_get(`${url}/nonexistent`)).rejects.toThrow('Not Found');
+    });
+    it('must throw an Error if server is unreachable', async () => {
+      const unreachableUrl = url.replace(`:${port}`, `:${port + 1}`);
+      try {
+        await http_get(`${unreachableUrl}/nonexistent`);
+        throw new Error('Expected http_get to throw an error');
+      } catch (e) {
+        expect(e.message).toBe('fetch failed');
+        expect(e.cause).toBeDefined();
+        expect(e.cause.code).toBe('ECONNREFUSED');
+      }
+    });
+    it('must throw an Error if server FQDN does not exist', async () => {
+      const unreachableUrl = 'http://anyname.invalid';
+      try {
+        await http_get(`${unreachableUrl}/nonexistent`);
+        throw new Error('Expected http_get to throw an error');
+      } catch (e) {
+        expect(e.message).toBe('fetch failed');
+        expect(e.cause).toBeDefined();
+        expect(e.cause.code).toBe('ENOTFOUND');
+      }
     });
   });
   describe('http_head', function () {
