@@ -33,4 +33,5 @@ export type HeadersResponse = {
 export type FullResponse<T> = {
   headers: Headers;
   body: T;
+  status: number;
 };

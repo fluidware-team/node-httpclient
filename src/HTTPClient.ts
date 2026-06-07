@@ -120,7 +120,7 @@ async function execute<T>(
   }
   const { headers } = res;
   if (method === 'HEAD') {
-    return { headers };
+    return { headers, status: res.status };
   }
 
   async function getBody<TBody>(): Promise<TBody> {
@@ -134,7 +134,7 @@ async function execute<T>(
 
   function handleReturn(): T | FullResponse<T> {
     if (returnAlsoHeaders) {
-      return { headers, body };
+      return { headers, body, status: res.status };
     }
     return body;
   }
